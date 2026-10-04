@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quán Cổng Trường - Trò Chơi Bán Hàng</title>
+<style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",sans-serif;}
+    body{background:#fff8e8;color:#333;min-height:100vh;}
+    .anh-dai-dien{font-size:24px;line-height:1;text-align:center;}
+    .nut{padding:10px 18px;border:none;border-radius:8px;font-size:16px;cursor:pointer;transition:all 0.2s;}
+    .nut:hover{transform:translateY(-2px);}
+    .nut-chinh{background:#ff6b35;color:white;}
+    .nut-chinh:hover{background:#e85a24;}
+    .nut-phu{background:#f0c040;color:#2b2b2b;}
+    .nut-phu:hover{background:#e0ad30;}
+    .nut-xanh{background:#34b960;color:white;}
+    .nut-xanh:hover{background:#28a050;}
+    .nut-xam{background:#d0d0d0;color:#444;}
+    .khung{background:white;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:20px;max-width:900px;margin:0 auto;}
+    .an-hien{display:none !important;}
+    h1{text-align:center;color:#d14818;margin-bottom:20px;}
+    h2{font-size:20px;margin-bottom:15px;color:#444;}
+    .hang-doi{background:#fff3cd;border-left:4px solid #ff9500;padding:12px;margin:10px 0;border-radius:0 8px 8px 0;}
+    .thong-bao{padding:10px 15px;border-radius:8px;margin:10px 0;}
+    .thanh-cong{background:#e6ffed;border:1px solid:#34b960;color:#208040;}
+    .canh-bao{background:#fff3cd;border:1px solid:#ff9500;color:#b36b00;}
+    .hang-san-pham{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:15px;margin:20px 0;}
+    .san-pham{border:2px solid #f0e0c0;border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:0.2s;}
+    .san-pham:hover{border-color:#ff6b35;background:#fff3ec;}
+    .san-pham .ten{font-weight:bold;margin:8px 0;}
+    .san-pham .gia{color:#d14818;font-weight:bold;}
+    .khach-hang{border-top:2px dashed #d0d0d0;margin-top:20px;padding-top:20px;}
+    .danh-sach-don{min-height:100px;background:#faf6ed;border-radius:8px;padding:15px;margin:10px 0;}
+    .dong-don{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;align-items:center;}
+    .ma-phong{font-size:24px;font-weight:bold;color:#d14818;letter-spacing:4px;text-align:center;background:#fff3ec;padding:10px;border-radius:8px;margin:10px 0;}
+    .bang-dieu-khien{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0;}
+    .vi-tri{display:flex;gap:20px;flex-wrap:wrap;}
+    .cot{flex:1;min-width:300px;}
+    .trang-thai-doi{color:#d14818;font-weight:bold;}
+    .trang-thai-sang{color:#28a050;font-weight:bold;}
+    .dong-tien{font-weight:bold;font-size:18px;color:#d14818;}
+</style>
+</head>
+<body>
+
+<!-- MÀN HÌNH CHÍNH -->
+<div id="man-hinh-chinh" class="khung" style="margin-top:30px;">
+    <h1>🏪 Quán Cổng Trường</h1>
+    <p style="text-align:center;margin-bottom:25px;">Trò chơi bán đồ ăn vặt vui vẻ — 1 người bán, 1 người mua</p>
+    
+    <div style="display:flex;gap:15px;justify-content:center;flex-wrap:wrap;margin:20px 0;">
+        <button class="nut nut-chinh" onclick="taoPhong()">Tạo Phòng Làm Nhân Viên</button>
+        <button class="nut nut-phu" onclick="hienNhapPhong()">Vào Phòng Làm Khách</button>
+    </div>
+
+    <div id="nhap-ma-phong" class="an-hien" style="margin-top:20px;">
+        <p>Nhập mã phòng bạn nhận được:</p>
+        <input type="text" id="ma-phong-nhap" placeholder="VD: ABC123" style="padding:10px;font-size:16px;width:200px;margin:10px 0;border-radius:6px;border:1px solid #ccc;">
+        <button class="nut nut-xanh" onclick="thamGiaPhong()">Tham Gia</button>
+    </div>
+</div>
+
+<!-- MÀN HÌNH CHỜ -->
+<div id="man-hinh-cho" class="khung an-hien" style="margin-top:30px;">
+    <h2>Đang chờ người chơi...</h2>
+    <p>Mã phòng của bạn:</p>
+    <div class="ma-phong" id="ma-phong-hien"></div>
+    <p style="color:#666;margin:10px 0;">Gửi mã này cho bạn chơi kia để họ vào phòng</p>
+    <p class="hang-doi" id="trang-thai-cho">Đang chờ khách vào hàng...</p>
+    <button class="nut nut-xam" onclick="veTrangChu()" style="margin-top:15px;">Quay Lại</button>
+</div>
+
+<!-- MÀN HÌNH CHƠI -->
+<div id="man-hinh-choi" class="khung an-hien" style="margin-top:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+        <h2 id="vai-tro-tieu-de">Vai trò</h2>
+        <span id="trang-thai-noi-ket" class="trang-thai-doi">Đang kết nối...</span>
+    </div>
+    <hr style="border:1px solid #f0e0c0;margin:10px 0;">
+
+    <div class="vi-tri">
+        <!-- BÊN NHÂN VIÊN BÁN HÀNG -->
+        <div class="cot" id="cot-ban-hang">
+            <h3>🛒 Danh sách hàng hóa</h3>
+            <div class="hang-san-pham" id="danh-sach-san-pham">
+                <!-- Điền bằng JS -->
+            </div>
+
+            <h3>📋 Đơn hàng từ khách</h3>
+            <div class="danh-sach-don" id="danh-sach-don-hang">
+                <p style="color:#999;">Chưa có đơn hàng nào...</p>
+            </div>
+            <div class="bang-dieu-khien">
+                <button class="nut nut-xanh" onclick="xacNhanDon()">Xác Nhận Đơn Hàng</button>
+                <button class="nut nut-chinh" onclick="inHoaDon()">In Hóa Đơn</button>
+            </div>
+        </div>
+
+        <!-- BÊN KHÁCH HÀNG -->
+        <div class="cot" id="cot-mua-hang">
+            <h3>🛍️ Giỏ hàng của bạn</h3>
+            <div class="danh-sach-don" id="gio-hang">
+                <p style="color:#999;">Chưa chọn mặt hàng nào...</p>
+            </div>
+            <p class="dong-tien">Tổng tiền: <span id="tong-tien">0</span> đồng</p>
+            <div class="bang-dieu-khien">
+                <button class="nut nut-chinh" onclick="guiDonHang()">Gửi Đơn Hàng</button>
+                <button class="nut nut-xam" onclick="xoaGioHang()">Xóa Giỏ Hàng</button>
+            </div>
+
+            <div class="khach-hang">
+                <h3>📝 Thông báo từ quán</h3>
+                <div id="thong-bao-quan" class="thong-bao">Đang chờ xác nhận...</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="nut nut-xam" onclick="veTrangChu()" style="margin-top:20px;">Thoát Trò Chơi</button>
+</div>
+
+<script>
+// DANH SÁCH SẢN PHẨM
+const SAN_PHAM = [
+    {id:'goi-ga-cay', ten:'Gói gà cay', gia:500, bieuTuong:'🍗'},
+    {id:'mi-cay', ten:'Mì cay gói', gia:300, bieuTuong:'🍜'},
+    {id:'keo-deo', ten:'Kẹo dẻo', gia:200, bieuTuong:'🍬'},
+    {id:'keo-chua', ten:'Kẹo chua ngọt', gia:200, bieuTuong:'🍭'},
+    {id:'nuoc-ngot', ten:'Nước ngọt', gia:400, bieuTuong:'🥤'},
+    {id:'nuoc-sinh-ho', ten:'Nước sinh tố', gia:600, bieuTuong:'🥛'},
+    {id:'banh-ngo', ten:'Bánh ngọt', gia:500, bieuTuong:'🧁'},
+    {id:'kho-bo', ten:'Khô bò cay', gia:800, bieuTuong:'🥩'},
+    {id:'hat-dieu', ten:'Hạt điều rang', gia:700, bieuTuong:'🌰'},
+    {id:'goi-tom', ten:'Gói tôm cay', gia:400, bieuTuong:'🦐'},
+    {id:'banh-mi', ten:'Bánh mì thịt', gia:1000, bieuTuong:'🥪'},
+    {id:'kem', ten:'Kem que', gia:300, bieuTuong:'🍦'}
+];
+
+// TRẠNG THỨC
+let trangThai = {
+    vaiTro: null, // 'nhan-vien' hoặc 'khach'
+    maPhong: null,
+    doiTac: null,
+    daSanSang: false,
+    gioHang: [],
+    donNhanDuoc: []
+};
+
+// TẠO MÃ PHÒNG NGẪU NHIÊN
+function taoMaPhong(){
+    const chuoi = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let ma = '';
+    for(let i=0; i<6; i++) ma += chuoi[Math.floor(Math.random()*chuoi.length)];
+    return ma;
+}
+
+// HIỂN THỊ MÀN HÌNH
+function hienManHinh(ten){
+    document.getElementById('man-hinh-chinh').classList.add('an-hien');
+    document.getElementById('man-hinh-cho').classList.add('an-hien');
+    document.getElementById('man-hinh-choi').classList.add('an-hien');
+    document.getElementById(ten).classList.remove('an-hien');
+}
+
+// TẠO PHÒNG
+function taoPhong(){
+    trangThai.vaiTro = 'nhan-vien';
+    trangThai.maPhong = taoMaPhong();
+    document.getElementById('ma-phong-hien').textContent = trangThai.maPhong;
+    hienManHinh('man-hinh-cho');
+    // Mô phỏng kết nối — trong thực tế dùng WebSocket/Firebase
+    moPhongKetNoi();
+}
+
+// HIỂN Ô NHẬP MÃ
+function hienNhapPhong(){
+    document.getElementById('nhap-ma-phong').classList.remove('an-hien');
+}
+
+// THAM GIA PHÒNG
+function thamGiaPhong(){
+    let ma = document.getElementById('ma-phong-nhap').value.trim().toUpperCase();
+    if(ma.length < 6){ alert('Vui lòng nhập mã phòng hợp lệ!'); return; }
+    trangThai.vaiTro = 'khach';
+    trangThai.maPhong = ma;
+    hienManHinh('man-hinh-cho');
+    document.getElementById('trang-thai-cho').textContent = 'Đang kết nối với phòng ' + ma + '...';
+    moPhongKetNoi();
+}
+
+// MÔ PHỎNG KẾT NỐI 2 NGƯỜI
+function moPhongKetNoi(){
+    setTimeout(()=>{
+        trangThai.daSanSang = true;
+        document.getElementById('trang-thai-cho').textContent = 'Đã kết nối thành công! Vào trò chơi...';
+        document.getElementById('trang-thai-cho').classList.add('trang-thai-sang');
+        setTimeout(vaoChoi, 800);
+    }, 1500);
+}
+
+// VÀO CHƠI
+function vaoChoi(){
+    hienManHinh('man-hinh-choi');
+    
+    // CẬP NHẬT VAI TRÒ
+    if(trangThai.vaiTro === 'nhan-vien'){
+        document.getElementById('vai-tro-tieu-de').textContent = '🏪 Nhân Viên Bán Hàng';
+        document.getElementById('cot-mua-hang').style.opacity = '0.6';
+        document.getElementById('cot-mua-hang').style.pointerEvents = 'none';
+    }else{
+        document.getElementById('vai-tro-tieu-de').textContent = '🙋 Khách Hàng';
+        document.getElementById('cot-ban-hang').style.opacity = '0.6';
+        document.getElementById('cot-ban-hang').style.pointerEvents = 'none';
+        document.getElementById('thong-bao-quan').innerHTML = '<span class="canh-bao">Chào bạn! Hãy chọn món và gửi đơn hàng nhé!</span>';
+    }
+
+    document.getElementById('trang-thai-noi-ket').textContent = 'Đã kết nối';
+    document.getElementById('trang-thai-noi-ket').classList.add('trang-thai-sang');
+
+    // VẼ DANH SÁCH SẢN PHẨM
+    veDanhSachSanPham();
+}
+
+// VẼ SẢN PHẨM
+function veDanhSachSanPham(){
+    const khung = document.getElementById('danh-sach-san-pham');
+    khung.innerHTML = '';
+    SAN_PHAM.forEach(sp => {
+        const div = document.createElement('div');
+        div.className = 'san-pham';
+        div.innerHTML = `
+            <div class="anh-dai-dien">${sp.bieuTuong}</div>
+            <div class="ten">${sp.ten}</div>
+            <div class="gia">${sp.gia} đồng</div>
+        `;
+        div.onclick = () => themVaoGioHang(sp);
+        khung.appendChild(div);
+    });
+}
+
+// THÊM VÀO GIỎ HÀNG
+function themVaoGioHang(sp){
+    if(trangThai.vaiTro !== 'khach') return;
+    trangThai.gioHang.push({...sp});
+    capNhatGioHang();
+}
+
+// CẬP NHẬT GIỎ HÀNG
+function capNhatGioHang(){
+    const khung = document.getElementById('gio-hang');
+    if(trangThai.gioHang.length === 0){
+        khung.innerHTML = '<p style="color:#999;">Chưa chọn mặt hàng nào...</p>';
+        document.getElementById('tong-tien').textContent = '0';
+        return;
+    }
+    let tong = 0;
+    khung.innerHTML = '';
+    trangThai.gioHang.forEach((hang, stt) => {
+        tong += hang.gia;
+        const d = document.createElement('div');
+        d.className = 'dong-don';
+        d.innerHTML = `
+            <span>${hang.bieuTuong} ${hang.ten}</span>
+            <span>${hang.gia} đồng</span>
+        `;
+        khung.appendChild(d);
+    });
+    document.getElementById('tong-tien').textContent = tong;
+}
+
+// XÓA GIỎ HÀNG
+function xoaGioHang(){
+    trangThai.gioHang = [];
+    capNhatGioHang();
+}
+
+// GỬI ĐƠN HÀNG
+function guiDonHang(){
+    if(trangThai.gioHang.length === 0){ alert('Bạn chưa chọn mặt hàng nào!'); return; }
+    // Gửi sang bên nhân viên — mô phỏng
+    trangThai.donNhanDuoc = [...trangThai.gioHang];
+    hienDonBenBanHang();
+    document.getElementById('thong-bao-quan').innerHTML = '<span class="canh-bao">Đơn hàng đã gửi! Chờ nhân viên xác nhận...</span>';
+}
+
+// HIỂN ĐƠN HÀNG BÊN BÁN
+function hienDonBenBanHang(){
+    const khung = document.getElementById('danh-sach-don-hang');
+    khung.innerHTML = '';
+    let tong = 0;
+    trangThai.donNhanDuoc.forEach(hang => {
+        tong += hang.gia;
+        const d = document.createElement('div');
+        d.className = 'dong-don';
+        d.innerHTML = `
+            <span>${hang.bieuTuong} ${hang.ten}</span>
+            <span>${hang.gia} đồng</span>
+        `;
+        khung.appendChild(d);
+    });
+    const tongDiv = document.createElement('div');
+    tongDiv.style.fontWeight = 'bold';
+    tongDiv.style.marginTop = '8px';
+    tongDiv.innerHTML = `Tổng: ${tong} đồng`;
+    khung.appendChild(tongDiv);
+}
+
+// XÁC NHẬN ĐƠN HÀNG
+function xacNhanDon(){
+    if(trangThai.donNhanDuoc.length === 0){ alert('Chưa có đơn hàng nào!'); return; }
+    document.getElementById('thong-bao-quan').innerHTML = '<span class="thanh-cong">Đơn hàng đã được xác nhận! Mời nhận hàng nhé!</span>';
+    alert('Đã xác nhận đơn hàng! Thông báo cho khách thành công!');
+}
+
+// IN HÓA ĐƠN
+function inHoaDon(){
+    if(trangThai.donNhanDuoc.length === 0){ alert('Chưa có đơn hàng nào!'); return; }
+    let tong = trangThai.donNhanDuoc.reduce((t,h)=>t+h.gia,0);
+    let chuoi = '======== HÓA ĐƠN QUÁN CỔNG TRƯỜNG ========\n';
+    chuoi += `Ngày: ${new Date().toLocaleString('vi-VN')}\n`;
+    chuoi += '----------------------------------------\n';
+    trangThai.donNhanDuoc.forEach(h => chuoi += `${h.bieuTuong} ${h.ten.padEnd(18)} ${h.gia} đồng\n`);
+    chuoi += '----------------------------------------\n';
+    chuoi += `TỔNG TIỀN: ${tong} đồng\n`;
+    chuoi += '========================================\n';
+    chuoi += 'Cảm ơn quý khách! Hẹn gặp lại!';
+    alert(chuoi);
+}
+
+// QUAY TRANG CHỦ
+function veTrangChu(){
+    trangThai = {vaiTro:null, maPhong:null, doiTac:null, daSanSang:false, gioHang:[], donNhanDuoc:[]};
+    document.getElementById('ma-phong-nhap').value = '';
+    document.getElementById('nhap-ma-phong').classList.add('an-hien');
+    hienManHinh('man-hinh-chinh');
+}
+</script>
+</body>
+  </html>
+  
